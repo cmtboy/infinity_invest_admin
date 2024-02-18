@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "516591309510",
+    "project_id": "infinity-mining-aaad3",
+    "storage_bucket": "infinity-mining-aaad3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:516591309510:android:e2f8fc9916ae2611cfbdc7",
+        "android_client_info": {
+          "package_name": "com.example.infinity_invest_admin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDGNesiP2C_Y5rjnjAvC4bFYUg2E-otQVU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:516591309510:android:d9c25e352ffa2521cfbdc7",
+        "android_client_info": {
+          "package_name": "com.example.infinity_investing"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDGNesiP2C_Y5rjnjAvC4bFYUg2E-otQVU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
