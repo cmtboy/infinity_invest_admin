@@ -163,42 +163,80 @@ class _DepositRequestState extends State<DepositRequest> {
   Future<void> updateParentReferbalance(
       searchValue, double depositAmount) async {
     try {
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+      // Level 1: Get the first-level referred user
+      QuerySnapshot level1QuerySnapshot = await FirebaseFirestore.instance
           .collection('users')
           .where('refer_code', isEqualTo: searchValue)
           .get();
-      DocumentSnapshot admindoc = await FirebaseFirestore.instance
-          .collection('admin')
-          .doc('refer')
-          .get();
-      Map<String, dynamic> referData = admindoc.data() as Map<String, dynamic>;
-      double commision = double.parse(referData['benefit']);
-      print("refer benefit $commision");
-      if (querySnapshot.docs.isNotEmpty) {
-        // Documents found
-        for (QueryDocumentSnapshot document in querySnapshot.docs) {
-          var data = document.data() as Map<String, dynamic>;
-          double balance = double.parse(data['balance']);
-          print("refferal balance $balance");
-          print("${(balance + (depositAmount * commision / 100))}");
+
+      if (level1QuerySnapshot.docs.isNotEmpty) {
+        for (QueryDocumentSnapshot level1Document in level1QuerySnapshot.docs) {
+          var level1Data = level1Document.data() as Map<String, dynamic>;
+          double level1Balance = double.parse(level1Data['balance']);
+          // Update the first-level referred user's balance
           await FirebaseFirestore.instance
               .collection('users')
-              .doc(document.id)
+              .doc(level1Document.id)
               .update({
-            'balance': (balance + (depositAmount * commision / 100)).toString(),
+            'balance': (level1Balance + (depositAmount * 0.07)).toString(),
           });
-          saveNewNotification(
-              document.id,
-              'Great!.From a refered persion you earn new profit',
-              'New refer balance added in your balance');
-          print('Document ID: ${document.id}, Data: ${document.data()}');
+
+          // Level 2: Get the second-level referred user
+          String level2ParentRefer = level1Data['parent_refer'] ?? '';
+          if (level2ParentRefer.isNotEmpty) {
+            QuerySnapshot level2QuerySnapshot = await FirebaseFirestore.instance
+                .collection('users')
+                .where('refer_code', isEqualTo: level2ParentRefer)
+                .get();
+
+            if (level2QuerySnapshot.docs.isNotEmpty) {
+              for (QueryDocumentSnapshot level2Document
+                  in level2QuerySnapshot.docs) {
+                var level2Data = level2Document.data() as Map<String, dynamic>;
+                double level2Balance = double.parse(level2Data['balance']);
+                // Update the second-level referred user's balance
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(level2Document.id)
+                    .update({
+                  'balance':
+                      (level2Balance + (depositAmount * 0.03)).toString(),
+                });
+
+                // Level 3: Get the third-level referred user
+                String level3ParentRefer = level2Data['parent_refer'] ?? '';
+                if (level3ParentRefer.isNotEmpty) {
+                  QuerySnapshot level3QuerySnapshot = await FirebaseFirestore
+                      .instance
+                      .collection('users')
+                      .where('refer_code', isEqualTo: level3ParentRefer)
+                      .get();
+
+                  if (level3QuerySnapshot.docs.isNotEmpty) {
+                    for (QueryDocumentSnapshot level3Document
+                        in level3QuerySnapshot.docs) {
+                      var level3Data =
+                          level3Document.data() as Map<String, dynamic>;
+                      double level3Balance =
+                          double.parse(level3Data['balance']);
+                      // Update the third-level referred user's balance
+                      await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(level3Document.id)
+                          .update({
+                        'balance':
+                            (level3Balance + (depositAmount * 0.02)).toString(),
+                      });
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
-      } else {
-        // No matching documents
-        print('No matching documents');
       }
     } catch (e) {
-      print('Error searching documents: $e');
+      print('Error updating referral balances: $e');
     }
   }
 
